@@ -1,0 +1,26 @@
+name: Deploy Bicep.
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Bicep template
+        run: |
+
+          az deployment group create --resource-group ILB-rg --name D1 --template-file bicep/main.bicep
+
+ 
