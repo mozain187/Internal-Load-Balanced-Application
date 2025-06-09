@@ -14,7 +14,7 @@ param adminName string = 'azureUser'
 @secure()
 param adminPassword string
 param LbName string = '${env}-LB'
-param storageAccountName string = '${env}diagstorage'
+param storageAccountName string = '${env}-sa-${uniqueString(resourceGroup().id)}'
 param numOfVMs int = 3
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
@@ -84,30 +84,7 @@ resource availableSet 'Microsoft.Compute/availabilitySets@2024-07-01' = {
   }
 }
 
-resource nic 'Microsoft.Network/networkInterfaces@2024-07-01' = [for i in range(1, numOfVMs+1):  {
-  name: '${env}-NIC-${i}'
-  location: location
-  properties: {
-    ipConfigurations: [
-      {
-        name: 'ipconfig1'
-        properties: {
-          privateIPAllocationMethod: 'Dynamic'
-          loadBalancerBackendAddressPools: [
-            {
-              id: resourceId('Microsoft.Network/loadBalancers/backendAddressPools', LbName, 'BackendPool')
-            }
-          ]
-          subnet: {
-            id: webVnet.properties.subnets[0].id
-          }
-         
-        }
-      }
-    ]
-  }
-}
-]
+
 
 resource vm 'Microsoft.Compute/virtualMachines@2024-07-01' = [for i in range(1, numOfVMs + 1): {
   name: '${env}-VM-${i}'
@@ -165,6 +142,9 @@ resource vm 'Microsoft.Compute/virtualMachines@2024-07-01' = [for i in range(1, 
 resource lb 'Microsoft.Network/loadBalancers@2024-07-01' = {
   name: LbName
   location: location
+  sku: {
+    name: 'Standard'
+  }
   properties: {
     frontendIPConfigurations: [
       {
@@ -248,6 +228,39 @@ resource lb 'Microsoft.Network/loadBalancers@2024-07-01' = {
 
   }
 }
+resource backendPool 'Microsoft.Network/loadBalancers/backendAddressPools@2024-07-01' = {
+  name: '${LbName}sBackendPool'
+  parent: lb
+
+}
+
+resource nic 'Microsoft.Network/networkInterfaces@2024-07-01' = [for i in range(1, numOfVMs+1):  {
+  name: '${env}-NIC-${i}'
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          privateIPAllocationMethod: 'Dynamic'
+          loadBalancerBackendAddressPools: [
+            {
+              id:backendPool.id
+            }
+          ]
+          subnet: {
+            id: webVnet.properties.subnets[0].id
+          }
+         
+        }
+      }
+    ]
+ 
+  }
+ 
+}
+]
+
 resource vmsNsg 'Microsoft.Network/networkSecurityGroups@2024-07-01' = {
   name: '${env}-NSG'
   location: location
@@ -358,13 +371,13 @@ resource bastion 'Microsoft.Network/bastionHosts@2024-07-01' = {
   }
 }
 
-resource workspace 'Microsoft.OperationalInsights/workspaces@2020-02-02' = {
+resource workspace 'Microsoft.OperationalInsights/workspaces@2020-08-01' = {
   name: '${env}LogAnalyticsWorkspace'
   location: location
-  sku: {
-    name: 'PerGB2018'
-  }
   properties: {
+    sku: {
+      name: 'PerGB2018'
+    }
     retentionInDays: 30
     features: {
       enableLogAccessUsingOnlyResourcePermissions: true
