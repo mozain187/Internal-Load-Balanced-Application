@@ -87,7 +87,7 @@ Log Analytics Workspace connected to all VMs.
 Application Insights instance created for web app metrics.
 
 Azure Diagnostics settings for VMs.
-
+```
 
 ## 📸 Screenshots
 
