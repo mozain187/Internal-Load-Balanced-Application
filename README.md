@@ -89,6 +89,17 @@ Application Insights instance created for web app metrics.
 Azure Diagnostics settings for VMs.
 
 
+## 📸 Screenshots
+
+### ✅ Successful Deployment via GitHub Actions
+![Deployment Success](screenshots/ILB-git.png)
+
+### deployed resources
+![Resources](screenshots/ILB-all.png)
+
+### 🌐 Back End
+![BackEnd](screenshots/ILB-BE.png)
+
 📄 License
 MIT
 VMs
