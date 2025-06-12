@@ -72,11 +72,11 @@ This project automates the deployment of a full Azure IaaS infrastructure using 
 
 ```bash
 az deployment group create \
-  --resource-group <your-resource-group> \
+  --resource-group ILB-rg \
   --template-file bicep/main.bicep \
-  --parameters adminPassword=<your-password>
+  --parameters adminPassword=^-^
 🔐 Notes
-
+Password should be  passed securely via GitHub Actions secrets for better security practice
 The Load Balancer uses custom health probes.
 
 Apache installed and health check created at /health.
