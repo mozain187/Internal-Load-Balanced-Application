@@ -76,13 +76,13 @@ az deployment group create \
   --template-file bicep/main.bicep \
   --parameters adminPassword=^-^
  ```
-🔐 Notes
+## 🔐 Notes
 Password should be  passed securely via GitHub Actions secrets for better security practice
 The Load Balancer uses custom health probes.
 
 Apache installed and health check created at /health.
 
-📊 Monitoring & Diagnostics
+## 📊 Monitoring & Diagnostics
 Log Analytics Workspace connected to all VMs.
 
 Application Insights instance created for web app metrics.
