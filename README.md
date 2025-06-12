@@ -9,7 +9,7 @@ Support Staff → via Bastion to VMs
 
 App users → via private IP behind ILB
 
-Purpose:
+# Purpose:
 
 Load balance internal traffic
 
@@ -19,7 +19,7 @@ Secure management via Bastion
 
 Monitor backend health
 
-Key services:
+# Key services:
 
 Azure Internal Load Balancer
 
