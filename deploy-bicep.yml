@@ -21,6 +21,6 @@ jobs:
       - name: Deploy Bicep template
         run: |
 
-          az deployment group create --resource-group ILB-rg --name D1 --template-file bicep/main.bicep
+          az deployment group create --resource-group ILB-rg --name D1 --template-file main.bicep
 
  
