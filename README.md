@@ -9,7 +9,7 @@ Support Staff → via Bastion to VMs
 
 App users → via private IP behind ILB
 
-# Purpose:
+#  My Purpose is to learn:
 
 Load balance internal traffic
 
