@@ -1,9 +1,9 @@
 # Internal-Load-Balanced-Application
- Internal Load Balanced Application
-Scenario:
+ Azure Bicep IaaS Deployment with GitHub Actions Internal Load Balanced Application
+## Scenario:
 Deploy an internal-only web app (intranet portal) load balanced across 3 VMs within a single Azure VNet using an Internal Load Balancer (ILB). Only internal support staff connect via Azure Bastion.
 
-Who connects:
+# Who connects:
 
 Support Staff → via Bastion to VMs
 
@@ -36,7 +36,7 @@ Application Insights
 vms
 
 
-# Azure Bicep IaaS Deployment with GitHub Actions
+
 
 ## 📖 Overview
 This project automates the deployment of a full Azure IaaS infrastructure using [Bicep](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview) and continuous deployment via GitHub Actions.
