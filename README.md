@@ -102,6 +102,6 @@ Azure Diagnostics settings for VMs.
 
 📄 License
 MIT
-VMs
+
 
 
