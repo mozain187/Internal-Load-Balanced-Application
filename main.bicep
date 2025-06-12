@@ -14,7 +14,7 @@ param adminName string = 'azureUser'
 @secure()
 param adminPassword string
 param LbName string = '${env}-LB'
-param storageAccountName string = '${env}-sa-${uniqueString(resourceGroup().id)}'
+param storageAccountName string = toLower('${env}${uniqueString(resourceGroup().id)}')
 param numOfVMs int = 3
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
@@ -110,11 +110,12 @@ resource vm 'Microsoft.Compute/virtualMachines@2024-07-01' = [for i in range(1, 
       }
     }
     osProfile: {
-      
-      computerName: '${env}-VM-${i}'
-      adminUsername: adminName
-      adminPassword: adminPassword
-    }
+  computerName: '${env}-VM-${i}'
+  adminUsername: adminName
+  adminPassword: adminPassword
+ 
+}
+
     networkProfile: {
 
       networkInterfaces: [
@@ -136,6 +137,15 @@ resource vm 'Microsoft.Compute/virtualMachines@2024-07-01' = [for i in range(1, 
   }
 
 }]
+// Extension to install Apache and health check script on VMs
+@description('Install Apache and health check script on VMs')
+module vmExtension 'ext.bicep' = {
+  name: 'probes-install'
+  params: {
+    location: location
+    vmName: [for i in range(1, numOfVMs + 1): '${env}-VM-${i}']
+  }
+}
 
 
 
@@ -157,12 +167,7 @@ resource lb 'Microsoft.Network/loadBalancers@2024-07-01' = {
         }
       }
     ]
-    backendAddressPools: [
-      {
-        name: 'BackendPool'
-       
-      }
-    ]
+   
     loadBalancingRules: [
       {
         name: 'HTTPRule'
@@ -171,7 +176,7 @@ resource lb 'Microsoft.Network/loadBalancers@2024-07-01' = {
             id: resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', LbName, 'LoadBalancerFrontEnd')
           }
           backendAddressPool: {
-            id: resourceId('Microsoft.Network/loadBalancers/backendAddressPools', LbName, 'BackendPool')
+            id: backendPool.id
           }
           probe: {
             id: resourceId('Microsoft.Network/loadBalancers/probes', LbName, 'HTTPProbe')
@@ -189,9 +194,7 @@ resource lb 'Microsoft.Network/loadBalancers@2024-07-01' = {
           frontendIPConfiguration: {
             id: resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', LbName, 'LoadBalancerFrontEnd')
           }
-          backendAddressPool: {
-            id: resourceId('Microsoft.Network/loadBalancers/backendAddressPools', LbName, 'BackendPool')
-          }
+         
           probe: {
             id: resourceId('Microsoft.Network/loadBalancers/probes', LbName, 'HTTPSProbe')
           }
@@ -217,11 +220,11 @@ resource lb 'Microsoft.Network/loadBalancers@2024-07-01' = {
       {
         name: 'HTTPSProbe'
         properties: {
-          protocol: 'Https'
+          protocol: 'Tcp'
           port: 443
           intervalInSeconds: 15
           numberOfProbes: 2
-          requestPath: '/health'
+          
         }
       }
     ]
@@ -229,8 +232,9 @@ resource lb 'Microsoft.Network/loadBalancers@2024-07-01' = {
   }
 }
 resource backendPool 'Microsoft.Network/loadBalancers/backendAddressPools@2024-07-01' = {
-  name: '${LbName}sBackendPool'
-  parent: lb
+ name: '${LbName}/BackendPool'
+
+ 
 
 }
 
@@ -243,11 +247,7 @@ resource nic 'Microsoft.Network/networkInterfaces@2024-07-01' = [for i in range(
         name: 'ipconfig1'
         properties: {
           privateIPAllocationMethod: 'Dynamic'
-          loadBalancerBackendAddressPools: [
-            {
-              id:backendPool.id
-            }
-          ]
+         
           subnet: {
             id: webVnet.properties.subnets[0].id
           }
@@ -401,24 +401,7 @@ resource diagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' 
   scope: vm[i]
   properties: {
     workspaceId: workspace.id
-    logs: [
-      {
-        category: 'VirtualMachineInsights'
-        enabled: true
-        retentionPolicy: {
-          enabled: false
-          days: 0
-        }
-      }
-      {
-        category: 'AuditEvent'
-        enabled: true
-        retentionPolicy: {
-          enabled: false
-          days: 0
-        }
-      }
-    ]
+ 
     metrics: [
       {
         category: 'AllMetrics'
